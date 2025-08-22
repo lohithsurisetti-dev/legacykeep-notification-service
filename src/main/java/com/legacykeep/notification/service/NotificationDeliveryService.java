@@ -49,8 +49,8 @@ public class NotificationDeliveryService {
     @Async("notificationTaskExecutor")
     @Transactional
     public CompletableFuture<Void> processNotificationAsync(Notification notification) {
-        log.info("Processing notification asynchronously: id={}, channel={}", 
-                notification.getId(), notification.getChannel());
+        log.info("Processing notification asynchronously: id={}, type={}", 
+                notification.getId(), notification.getNotificationType());
 
         try {
             // Mark notification as processing
@@ -98,7 +98,7 @@ public class NotificationDeliveryService {
      */
     private boolean processNotificationByChannel(Notification notification, NotificationDelivery delivery) {
         try {
-            switch (notification.getChannel()) {
+            switch (notification.getNotificationType()) {
                 case EMAIL:
                     return emailDeliveryService.sendEmail(notification, delivery);
                 case PUSH:
@@ -108,12 +108,12 @@ public class NotificationDeliveryService {
                 case IN_APP:
                     return inAppDeliveryService.sendInAppNotification(notification, delivery);
                 default:
-                    log.error("Unsupported notification channel: {}", notification.getChannel());
+                    log.error("Unsupported notification type: {}", notification.getNotificationType());
                     return false;
             }
         } catch (Exception e) {
             log.error("Error sending notification via {}: {}", 
-                    notification.getChannel(), e.getMessage(), e);
+                    notification.getNotificationType(), e.getMessage(), e);
             return false;
         }
     }
@@ -297,7 +297,7 @@ public class NotificationDeliveryService {
     private NotificationDelivery createDeliveryRecord(Notification notification) {
         NotificationDelivery delivery = new NotificationDelivery(
                 notification.getId(),
-                notification.getChannel()
+                NotificationChannel.valueOf(notification.getNotificationType().name())
         );
 
         return deliveryRepository.save(delivery);

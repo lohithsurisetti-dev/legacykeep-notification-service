@@ -2,7 +2,6 @@ package com.legacykeep.notification;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * LegacyKeep Notification Service Application
@@ -15,7 +14,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
  * @version 1.0.0
  */
 @SpringBootApplication
-@EnableFeignClients
 public class NotificationServiceApplication {
 
     public static void main(String[] args) {

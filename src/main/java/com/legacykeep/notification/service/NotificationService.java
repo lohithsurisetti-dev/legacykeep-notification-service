@@ -1,48 +1,23 @@
 package com.legacykeep.notification.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.legacykeep.notification.dto.request.SendNotificationRequest;
 import com.legacykeep.notification.dto.response.NotificationResponse;
-import com.legacykeep.notification.entity.*;
-import com.legacykeep.notification.repository.NotificationEventRepository;
-import com.legacykeep.notification.repository.NotificationRepository;
-import com.legacykeep.notification.repository.NotificationTemplateRepository;
-import com.legacykeep.notification.repository.UserNotificationPreferencesRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import com.legacykeep.notification.entity.NotificationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 /**
- * Notification Service for managing notification lifecycle.
+ * Notification Service Interface
  * 
- * Provides business logic for notification creation, processing,
- * delivery tracking, and management with comprehensive validation
- * and error handling.
+ * Defines the contract for notification operations including
+ * notification creation, management, and delivery tracking.
  * 
  * @author LegacyKeep Team
  * @version 1.0.0
  */
-@Slf4j
-@Service
-@RequiredArgsConstructor
-public class NotificationService {
-
-    private final NotificationRepository notificationRepository;
-    private final NotificationTemplateRepository templateRepository;
-    private final UserNotificationPreferencesRepository preferencesRepository;
-    private final NotificationEventRepository eventRepository;
-    private final NotificationTemplateService templateService;
-    private final NotificationDeliveryService deliveryService;
-    private final ObjectMapper objectMapper;
+public interface NotificationService {
 
     // =============================================================================
     // Notification Creation and Management
@@ -51,148 +26,59 @@ public class NotificationService {
     /**
      * Create and send a notification.
      * 
-     * This method handles the complete notification process:
-     * - Validates request data
-     * - Checks user preferences
-     * - Creates notification record
-     * - Processes template
-     * - Initiates delivery
-     * - Logs events
+     * @param request Notification request data
+     * @return Notification response with details
      */
-    @Transactional
-    public NotificationResponse sendNotification(SendNotificationRequest request) {
-        log.info("Processing notification request: templateId={}, recipientId={}, channel={}", 
-                request.getTemplateId(), request.getRecipientId(), request.getChannel());
-
-        // Validate request
-        validateNotificationRequest(request);
-
-        // Check user preferences
-        checkUserPreferences(request);
-
-        // Get template
-        NotificationTemplate template = getTemplate(request.getTemplateId());
-
-        // Create notification
-        Notification notification = createNotification(request, template);
-
-        // Process template and set content
-        processNotificationContent(notification, template, request);
-
-        // Save notification
-        Notification savedNotification = notificationRepository.save(notification);
-
-        // Log event
-        logNotificationEvent(savedNotification, "NOTIFICATION_CREATED", request);
-
-        // Initiate delivery (async)
-        deliveryService.processNotificationAsync(savedNotification);
-
-        log.info("Notification created successfully: id={}, eventId={}", 
-                savedNotification.getId(), savedNotification.getEventId());
-
-        return buildNotificationResponse(savedNotification);
-    }
+    NotificationResponse sendNotification(SendNotificationRequest request);
 
     /**
      * Get notification by ID.
+     * 
+     * @param id Notification ID
+     * @return Notification response
      */
-    @Transactional(readOnly = true)
-    public NotificationResponse getNotificationById(Long id) {
-        log.debug("Fetching notification by ID: {}", id);
-
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + id));
-
-        return buildNotificationResponse(notification);
-    }
+    NotificationResponse getNotificationById(Long id);
 
     /**
      * Get notification by event ID.
+     * 
+     * @param eventId Event ID
+     * @return Notification response
      */
-    @Transactional(readOnly = true)
-    public NotificationResponse getNotificationByEventId(String eventId) {
-        log.debug("Fetching notification by event ID: {}", eventId);
-
-        Notification notification = notificationRepository.findByEventId(eventId)
-                .orElseThrow(() -> new IllegalArgumentException("Notification not found with event ID: " + eventId));
-
-        return buildNotificationResponse(notification);
-    }
+    NotificationResponse getNotificationByEventId(String eventId);
 
     /**
      * Get notifications for a user with pagination.
+     * 
+     * @param userId User ID
+     * @param pageable Pagination parameters
+     * @return Page of notification responses
      */
-    @Transactional(readOnly = true)
-    public Page<NotificationResponse> getUserNotifications(Long userId, Pageable pageable) {
-        log.debug("Fetching notifications for user: {}, page: {}, size: {}", 
-                userId, pageable.getPageNumber(), pageable.getPageSize());
-
-        Page<Notification> notifications = notificationRepository.findByRecipientId(userId, pageable);
-
-        return notifications.map(this::buildNotificationResponse);
-    }
+    Page<NotificationResponse> getUserNotifications(Long userId, Pageable pageable);
 
     /**
      * Get notifications by status.
+     * 
+     * @param status Notification status
+     * @return List of notification responses
      */
-    @Transactional(readOnly = true)
-    public List<NotificationResponse> getNotificationsByStatus(NotificationStatus status) {
-        log.debug("Fetching notifications by status: {}", status);
-
-        List<Notification> notifications = notificationRepository.findByStatus(status);
-
-        return notifications.stream()
-                .map(this::buildNotificationResponse)
-                .toList();
-    }
+    List<NotificationResponse> getNotificationsByStatus(NotificationStatus status);
 
     /**
      * Cancel a notification.
+     * 
+     * @param id Notification ID
+     * @return Notification response
      */
-    @Transactional
-    public NotificationResponse cancelNotification(Long id) {
-        log.info("Cancelling notification: {}", id);
-
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + id));
-
-        if (notification.getStatus() == NotificationStatus.DELIVERED) {
-            throw new IllegalStateException("Cannot cancel already delivered notification");
-        }
-
-        notification.cancel();
-        Notification savedNotification = notificationRepository.save(notification);
-
-        logNotificationEvent(savedNotification, "NOTIFICATION_CANCELLED", null);
-
-        return buildNotificationResponse(savedNotification);
-    }
+    NotificationResponse cancelNotification(Long id);
 
     /**
      * Retry a failed notification.
+     * 
+     * @param id Notification ID
+     * @return Notification response
      */
-    @Transactional
-    public NotificationResponse retryNotification(Long id) {
-        log.info("Retrying notification: {}", id);
-
-        Notification notification = notificationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Notification not found with ID: " + id));
-
-        if (!notification.canRetry()) {
-            throw new IllegalStateException("Notification cannot be retried");
-        }
-
-        notification.markAsProcessing();
-        Notification savedNotification = notificationRepository.save(notification);
-
-        // Initiate retry delivery (async)
-        deliveryService.processNotificationAsync(savedNotification);
-
-        logNotificationEvent(savedNotification, "NOTIFICATION_RETRY", null);
-
-        return buildNotificationResponse(savedNotification);
-    }
+    NotificationResponse retryNotification(Long id);
 
     // =============================================================================
     // Batch Operations
@@ -200,252 +86,191 @@ public class NotificationService {
 
     /**
      * Send notifications to multiple recipients.
+     * 
+     * @param requests List of notification requests
+     * @return List of notification responses
      */
-    @Transactional
-    public List<NotificationResponse> sendBatchNotifications(List<SendNotificationRequest> requests) {
-        log.info("Processing batch notification request: {} notifications", requests.size());
-
-        return requests.stream()
-                .map(this::sendNotification)
-                .toList();
-    }
+    List<NotificationResponse> sendBatchNotifications(List<SendNotificationRequest> requests);
 
     /**
      * Get pending notifications ready to be sent.
+     * 
+     * @return List of notification responses
      */
-    @Transactional(readOnly = true)
-    public List<NotificationResponse> getPendingNotifications() {
-        log.debug("Fetching pending notifications ready to be sent");
-
-        List<Notification> notifications = notificationRepository.findPendingNotificationsReadyToSend(LocalDateTime.now());
-
-        return notifications.stream()
-                .map(this::buildNotificationResponse)
-                .toList();
-    }
+    List<NotificationResponse> getPendingNotifications();
 
     /**
      * Get failed notifications that can be retried.
+     * 
+     * @return List of notification responses
      */
-    @Transactional(readOnly = true)
-    public List<NotificationResponse> getFailedNotificationsForRetry() {
-        log.debug("Fetching failed notifications that can be retried");
-
-        List<Notification> notifications = notificationRepository.findFailedNotificationsForRetry();
-
-        return notifications.stream()
-                .map(this::buildNotificationResponse)
-                .toList();
-    }
+    List<NotificationResponse> getFailedNotificationsForRetry();
 
     // =============================================================================
-    // Validation Methods
+    // Analytics and Reporting
     // =============================================================================
 
     /**
-     * Validate notification request.
+     * Get notification statistics for a user.
+     * 
+     * @param userId User ID
+     * @return Notification statistics
      */
-    private void validateNotificationRequest(SendNotificationRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Notification request cannot be null");
-        }
-
-        if (!request.isValidForChannel()) {
-            throw new IllegalArgumentException("Invalid recipient information for channel: " + request.getChannel());
-        }
-
-        if (request.getScheduledAt() != null && request.getScheduledAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Scheduled time cannot be in the past");
-        }
-
-        if (request.getMaxRetries() != null && (request.getMaxRetries() < 0 || request.getMaxRetries() > 10)) {
-            throw new IllegalArgumentException("Max retries must be between 0 and 10");
-        }
-    }
+    Object getUserNotificationStats(Long userId);
 
     /**
-     * Check user notification preferences.
+     * Get notification statistics for a time period.
+     * 
+     * @param startDate Start date
+     * @param endDate End date
+     * @return Notification statistics
      */
-    private void checkUserPreferences(SendNotificationRequest request) {
-        UserNotificationPreferences preferences = preferencesRepository.findByUserIdOrCreateDefault(request.getRecipientId());
-
-        if (!preferences.isChannelEnabled(request.getChannel())) {
-            throw new IllegalStateException("User has disabled " + request.getChannel() + " notifications");
-        }
-
-        // Check quiet hours for non-urgent notifications
-        if (request.getPriority() != NotificationPriority.URGENT && preferences.isInQuietHours()) {
-            log.info("Notification scheduled during quiet hours for user: {}", request.getRecipientId());
-            // Could implement quiet hours logic here
-        }
-    }
+    Object getNotificationStats(String startDate, String endDate);
 
     /**
-     * Get notification template.
+     * Get delivery statistics by channel.
+     * 
+     * @param channel Notification channel
+     * @return Delivery statistics
      */
-    private NotificationTemplate getTemplate(String templateId) {
-        return templateRepository.findByTemplateIdAndIsActiveTrue(templateId)
-                .orElseThrow(() -> new IllegalArgumentException("Active template not found: " + templateId));
-    }
+    Object getDeliveryStatsByChannel(String channel);
 
     // =============================================================================
-    // Helper Methods
+    // Template Management
     // =============================================================================
 
     /**
-     * Create notification entity from request.
+     * Get available notification templates.
+     * 
+     * @return List of template information
      */
-    private Notification createNotification(SendNotificationRequest request, NotificationTemplate template) {
-        String eventId = generateEventId();
-
-        Notification notification = new Notification(
-                eventId,
-                request.getNotificationType(),
-                request.getTemplateId(),
-                request.getRecipientId()
-        );
-
-        notification.setChannel(request.getChannel());
-        notification.setPriority(request.getPriority());
-        notification.setScheduledAt(request.getScheduledAt());
-        notification.setMaxRetries(request.getMaxRetries());
-        notification.setCorrelationId(request.getCorrelationId());
-        notification.setCreatedBy(request.getSourceService());
-
-        // Set recipient information based on channel
-        switch (request.getChannel()) {
-            case EMAIL:
-                notification.setRecipientEmail(request.getRecipientEmail());
-                break;
-            case SMS:
-                notification.setRecipientPhone(request.getRecipientPhone());
-                break;
-            case PUSH:
-                notification.setRecipientDeviceToken(request.getRecipientDeviceToken());
-                break;
-        }
-
-        return notification;
-    }
+    List<Object> getAvailableTemplates();
 
     /**
-     * Process notification content using template.
+     * Get template by ID.
+     * 
+     * @param templateId Template ID
+     * @return Template information
      */
-    private void processNotificationContent(Notification notification, NotificationTemplate template, SendNotificationRequest request) {
-        try {
-            // Process subject
-            if (request.getSubject() != null) {
-                notification.setSubject(request.getSubject());
-            } else if (template.hasSubject()) {
-                String processedSubject = templateService.processTemplate(template.getSubjectTemplate(), request.getTemplateVariables());
-                notification.setSubject(processedSubject);
-            }
-
-            // Process content
-            if (request.getCustomContent() != null) {
-                notification.setContent(request.getCustomContent());
-            } else {
-                String processedContent = templateService.processTemplate(template.getTemplateContent(), request.getTemplateVariables());
-                notification.setContent(processedContent);
-            }
-
-            // Store template variables as JSON
-            if (request.getTemplateVariables() != null) {
-                notification.setTemplateData(objectMapper.writeValueAsString(request.getTemplateVariables()));
-            }
-
-            // Store metadata as JSON
-            if (request.getMetadata() != null) {
-                notification.setMetadata(objectMapper.writeValueAsString(request.getMetadata()));
-            }
-
-        } catch (JsonProcessingException e) {
-            log.error("Error processing notification content: {}", e.getMessage(), e);
-            throw new RuntimeException("Error processing notification content", e);
-        }
-    }
+    Object getTemplateById(String templateId);
 
     /**
-     * Build notification response DTO.
+     * Create new notification template.
+     * 
+     * @param template Template data
+     * @return Created template information
      */
-    private NotificationResponse buildNotificationResponse(Notification notification) {
-        return NotificationResponse.builder()
-                .id(notification.getId())
-                .eventId(notification.getEventId())
-                .templateId(notification.getTemplateId())
-                .notificationType(notification.getNotificationType())
-                .channel(notification.getChannel())
-                .priority(notification.getPriority())
-                .status(notification.getStatus())
-                .recipientId(notification.getRecipientId())
-                .recipientEmail(maskEmail(notification.getRecipientEmail()))
-                .recipientPhone(maskPhone(notification.getRecipientPhone()))
-                .subject(notification.getSubject())
-                .createdAt(notification.getCreatedAt())
-                .scheduledAt(notification.getScheduledAt())
-                .sentAt(notification.getSentAt())
-                .deliveredAt(notification.getDeliveredAt())
-                .failedAt(notification.getFailedAt())
-                .retryCount(notification.getRetryCount())
-                .maxRetries(notification.getMaxRetries())
-                .failureReason(notification.getFailureReason())
-                .correlationId(notification.getCorrelationId())
-                .metadata(notification.getMetadata())
-                .build();
-    }
+    Object createTemplate(Object template);
 
     /**
-     * Log notification event.
+     * Update notification template.
+     * 
+     * @param templateId Template ID
+     * @param template Updated template data
+     * @return Updated template information
      */
-    private void logNotificationEvent(Notification notification, String eventType, SendNotificationRequest request) {
-        try {
-            NotificationEvent event = new NotificationEvent(
-                    notification.getEventId(),
-                    eventType,
-                    "NOTIFICATION_SERVICE",
-                    notification.getRecipientId(),
-                    notification.getCorrelationId(),
-                    request != null ? request.getRequestId() : null,
-                    objectMapper.writeValueAsString(notification)
-            );
-
-            eventRepository.save(event);
-        } catch (JsonProcessingException e) {
-            log.error("Error logging notification event: {}", e.getMessage(), e);
-        }
-    }
+    Object updateTemplate(String templateId, Object template);
 
     /**
-     * Generate unique event ID.
+     * Delete notification template.
+     * 
+     * @param templateId Template ID
      */
-    private String generateEventId() {
-        return "notif-" + UUID.randomUUID().toString();
-    }
+    void deleteTemplate(String templateId);
+
+    // =============================================================================
+    // User Preferences
+    // =============================================================================
 
     /**
-     * Mask email for privacy.
+     * Get user notification preferences.
+     * 
+     * @param userId User ID
+     * @return User preferences
      */
-    private String maskEmail(String email) {
-        if (email == null || email.isEmpty()) {
-            return null;
-        }
-        int atIndex = email.indexOf('@');
-        if (atIndex <= 1) {
-            return email;
-        }
-        return email.charAt(0) + "***@" + email.substring(atIndex + 1);
-    }
+    Object getUserPreferences(Long userId);
 
     /**
-     * Mask phone number for privacy.
+     * Update user notification preferences.
+     * 
+     * @param userId User ID
+     * @param preferences Updated preferences
+     * @return Updated preferences
      */
-    private String maskPhone(String phone) {
-        if (phone == null || phone.isEmpty()) {
-            return null;
-        }
-        if (phone.length() <= 4) {
-            return phone;
-        }
-        return "***" + phone.substring(phone.length() - 4);
-    }
+    Object updateUserPreferences(Long userId, Object preferences);
+
+    /**
+     * Enable notification channel for user.
+     * 
+     * @param userId User ID
+     * @param channel Notification channel
+     */
+    void enableNotificationChannel(Long userId, String channel);
+
+    /**
+     * Disable notification channel for user.
+     * 
+     * @param userId User ID
+     * @param channel Notification channel
+     */
+    void disableNotificationChannel(Long userId, String channel);
+
+    // =============================================================================
+    // Health and Monitoring
+    // =============================================================================
+
+    /**
+     * Check notification service health.
+     * 
+     * @return Health status
+     */
+    Object getServiceHealth();
+
+    /**
+     * Get notification service metrics.
+     * 
+     * @return Service metrics
+     */
+    Object getServiceMetrics();
+
+    /**
+     * Get notification queue status.
+     * 
+     * @return Queue status information
+     */
+    Object getQueueStatus();
+
+    // =============================================================================
+    // Administrative Operations
+    // =============================================================================
+
+    /**
+     * Purge old notifications.
+     * 
+     * @param daysOld Number of days old
+     * @return Number of notifications purged
+     */
+    int purgeOldNotifications(int daysOld);
+
+    /**
+     * Resend failed notifications.
+     * 
+     * @return Number of notifications resent
+     */
+    int resendFailedNotifications();
+
+    /**
+     * Update notification service configuration.
+     * 
+     * @param config Configuration data
+     * @return Updated configuration
+     */
+    Object updateServiceConfiguration(Object config);
+
+    /**
+     * Get notification service configuration.
+     * 
+     * @return Current configuration
+     */
+    Object getServiceConfiguration();
 }

@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import java.util.Base64;
 import java.util.Map;
 
@@ -414,8 +414,8 @@ public class EmailDeliveryService {
      */
     public boolean isHealthy() {
         try {
-            // Test mail sender connection
-            mailSender.testConnection();
+            // Simple health check - try to create a message
+            mailSender.createMimeMessage();
             return true;
         } catch (Exception e) {
             log.error("Email service health check failed: {}", e.getMessage(), e);

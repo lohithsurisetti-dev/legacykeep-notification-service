@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  notification-db:
+    image: postgres:15-alpine
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5433:5432"
+    volumes:
+      - notification_postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - notification-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d notification_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  notification-redis:
+    image: redis:7-alpine
+    container_name: notification-redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - notification_redis_data:/data
+    networks:
+      - notification-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Apache Kafka
+  notification-kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: notification-kafka
+    depends_on:
+      - notification-zookeeper
+    ports:
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: notification-zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://notification-kafka:29092,PLAINTEXT_HOST://localhost:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_JMX_PORT: 9101
+      KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - notification-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:29092 --list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Zookeeper (required for Kafka)
+  notification-zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: notification-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - notification-network
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kafka UI (optional - for development)
+  notification-kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: notification-kafka-ui
+    depends_on:
+      - notification-kafka
+    ports:
+      - "8084:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: notification-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: notification-kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: notification-zookeeper:2181
+    networks:
+      - notification-network
+
+  # Redis Commander (optional - for development)
+  notification-redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: notification-redis-commander
+    depends_on:
+      - notification-redis
+    ports:
+      - "8085:8081"
+    environment:
+      REDIS_HOSTS: local:notification-redis:6379
+    networks:
+      - notification-network
+
+volumes:
+  notification_postgres_data:
+    driver: local
+  notification_redis_data:
+    driver: local
+
+networks:
+  notification-network:
+    driver: bridge

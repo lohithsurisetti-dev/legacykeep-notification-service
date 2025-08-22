@@ -1,18 +1,21 @@
-package com.legacykeep.service;
+package com.legacykeep.notification;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * Notification Service Application.
+ * LegacyKeep Notification Service Application
  * 
- * Handles all notification types including email, push notifications,
- * and SMS for the LegacyKeep platform.
+ * This is the main entry point for the Notification microservice.
+ * It handles all notification types including email, push notifications,
+ * and SMS through event-driven architecture with Kafka integration.
  * 
  * @author LegacyKeep Team
  * @version 1.0.0
  */
 @SpringBootApplication
+@EnableFeignClients
 public class NotificationServiceApplication {
 
     public static void main(String[] args) {

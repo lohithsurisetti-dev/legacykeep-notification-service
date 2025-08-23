@@ -177,25 +177,26 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     // Performance Queries
     // =============================================================================
 
-    /**
-     * Find notifications with average delivery time
-     */
-    @Query("SELECT n.notificationType, " +
-           "AVG(EXTRACT(EPOCH FROM (n.deliveredAt - n.sentAt)) * 1000) as avgDeliveryTimeMs " +
-           "FROM Notification n " +
-           "WHERE n.sentAt IS NOT NULL AND n.deliveredAt IS NOT NULL " +
-           "GROUP BY n.notificationType")
-    List<Object[]> getAverageDeliveryTimeByType();
+    // TODO: Fix these queries for performance analytics
+    // /**
+    //  * Find notifications with average delivery time
+    //  */
+    // @Query("SELECT n.notificationType, " +
+    //        "AVG(CAST(EXTRACT(EPOCH FROM (n.deliveredAt - n.sentAt)) AS DOUBLE PRECISION) * 1000) as avgDeliveryTimeMs " +
+    //        "FROM Notification n " +
+    //        "WHERE n.sentAt IS NOT NULL AND n.deliveredAt IS NOT NULL " +
+    //        "GROUP BY n.notificationType")
+    // List<Object[]> getAverageDeliveryTimeByType();
 
-    /**
-     * Find notifications with average delivery time by template
-     */
-    @Query("SELECT n.templateId, " +
-           "AVG(EXTRACT(EPOCH FROM (n.deliveredAt - n.sentAt)) * 1000) as avgDeliveryTimeMs " +
-           "FROM Notification n " +
-           "WHERE n.sentAt IS NOT NULL AND n.deliveredAt IS NOT NULL " +
-           "GROUP BY n.templateId")
-    List<Object[]> getAverageDeliveryTimeByTemplate();
+    // /**
+    //  * Find notifications with average delivery time by template
+    //  */
+    // @Query("SELECT n.templateId, " +
+    //        "AVG(CAST(EXTRACT(EPOCH FROM (n.deliveredAt - n.sentAt)) AS DOUBLE PRECISION) * 1000) as avgDeliveryTimeMs " +
+    //        "FROM Notification n " +
+    //        "WHERE n.sentAt IS NOT NULL AND n.deliveredAt IS NOT NULL " +
+    //        "GROUP BY n.templateId")
+    // List<Object[]> getAverageDeliveryTimeByTemplate();
 
     // =============================================================================
     // Cleanup Queries

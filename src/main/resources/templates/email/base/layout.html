@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">LegacyKeep</title>
+    <style>
+        /* Reset styles */
+        body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+        }
+        table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+        }
+        img {
+            -ms-interpolation-mode: bicubic;
+            border: 0;
+            height: auto;
+            line-height: 100%;
+            outline: none;
+            text-decoration: none;
+        }
+        
+        /* Base styles */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #F9FAFB;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+        }
+        
+        .header {
+            background-color: #FFFFFF;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        
+        .logo {
+            max-width: 150px;
+            height: auto;
+        }
+        
+        .content {
+            padding: 40px 20px;
+            background-color: #FFFFFF;
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: #6B7280;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+        
+        .button {
+            display: inline-block;
+            background-color: #4F46E5;
+            color: #FFFFFF;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .button:hover {
+            background-color: #3730A3;
+        }
+        
+        .button-danger {
+            background-color: #DC2626;
+        }
+        
+        .button-danger:hover {
+            background-color: #B91C1C;
+        }
+        
+        .footer {
+            background-color: #F3F4F6;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .footer-text {
+            font-size: 14px;
+            color: #6B7280;
+            margin-bottom: 10px;
+        }
+        
+        .footer-links {
+            font-size: 14px;
+            color: #6B7280;
+        }
+        
+        .footer-links a {
+            color: #6B7280;
+            text-decoration: none;
+        }
+        
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+        
+        .divider {
+            border-top: 1px solid #E5E7EB;
+            margin: 30px 0;
+        }
+        
+        .highlight {
+            background-color: #FEF3C7;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #F59E0B;
+            margin: 20px 0;
+        }
+        
+        .warning {
+            background-color: #FEE2E2;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #EF4444;
+            margin: 20px 0;
+        }
+        
+        /* Responsive design */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+            }
+            
+            .content {
+                padding: 20px 15px !important;
+            }
+            
+            .title {
+                font-size: 20px !important;
+            }
+            
+            .subtitle {
+                font-size: 16px !important;
+            }
+            
+            .text {
+                font-size: 14px !important;
+            }
+            
+            .button {
+                display: block !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <img th:src="${logoUrl}" alt="LegacyKeep" class="logo" />
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <h1 class="title" th:text="${title}">Email Title</h1>
+            <p class="subtitle" th:if="${subtitle}" th:text="${subtitle}">Email Subtitle</p>
+            
+            <!-- Dynamic content -->
+            <div th:replace="${content}">
+                <!-- Template-specific content goes here -->
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p class="footer-text">© 2025 LegacyKeep. All rights reserved.</p>
+            <p class="footer-links">
+                <a th:href="${privacyUrl}">Privacy Policy</a> | 
+                <a th:href="${helpUrl}">Help Center</a>
+                <span th:if="${unsubscribeUrl}"> | <a th:href="${unsubscribeUrl}">Unsubscribe</a></span>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

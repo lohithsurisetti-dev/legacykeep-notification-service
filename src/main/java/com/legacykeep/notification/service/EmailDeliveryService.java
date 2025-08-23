@@ -465,4 +465,69 @@ public class EmailDeliveryService {
                 "templateType", defaultTemplateType
         );
     }
+
+    // =============================================================================
+    // Test Methods
+    // =============================================================================
+
+    /**
+     * Send test email using Thymeleaf template.
+     * 
+     * @param toEmail Recipient email address
+     * @param templateName Template name (without .html extension)
+     * @param subject Email subject
+     * @param variables Template variables
+     * @return True if email sent successfully
+     */
+    public boolean sendTestEmail(String toEmail, String templateName, String subject, Map<String, Object> variables) {
+        log.info("Sending test email: to={}, template={}, subject={}", toEmail, templateName, subject);
+
+        try {
+            // Validate email address
+            if (!isValidEmailAddress(toEmail)) {
+                log.error("Invalid email address: {}", toEmail);
+                return false;
+            }
+
+            // Create MimeMessage
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            // Set basic email properties
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            helper.setFrom(defaultSenderAddress, defaultSenderName);
+
+            // Process template
+            Context context = new Context();
+            if (variables != null) {
+                variables.forEach(context::setVariable);
+            }
+
+            // Set default variables if not provided
+            if (!variables.containsKey("logoUrl")) {
+                context.setVariable("logoUrl", "https://legacykeep.com/logo.png");
+            }
+            if (!variables.containsKey("privacyUrl")) {
+                context.setVariable("privacyUrl", "https://legacykeep.com/privacy");
+            }
+            if (!variables.containsKey("helpUrl")) {
+                context.setVariable("helpUrl", "https://legacykeep.com/help");
+            }
+
+            // Process template content
+            String htmlContent = templateEngine.process("email/" + templateName, context);
+            helper.setText(htmlContent, true);
+
+            // Send email
+            mailSender.send(message);
+
+            log.info("Test email sent successfully: to={}, template={}", toEmail, templateName);
+            return true;
+
+        } catch (Exception e) {
+            log.error("Error sending test email: to={}, template={}, error={}", toEmail, templateName, e.getMessage(), e);
+            return false;
+        }
+    }
 }

@@ -14,6 +14,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -81,6 +82,7 @@ public class Notification {
     private String content;
 
     @Column(name = "template_data", columnDefinition = "JSONB")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String templateData; // JSON string for template variables
 
     @Enumerated(EnumType.STRING)
@@ -125,6 +127,7 @@ public class Notification {
     private String createdBy;
 
     @Column(name = "metadata", columnDefinition = "JSONB")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String metadata; // JSON string for additional metadata
 
     // =============================================================================

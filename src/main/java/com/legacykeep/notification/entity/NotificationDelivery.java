@@ -68,6 +68,7 @@ public class NotificationDelivery {
     private String failureReason;
 
     @Column(name = "delivery_metadata", columnDefinition = "JSONB")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String deliveryMetadata; // JSON string for delivery-specific metadata
 
     @CreationTimestamp

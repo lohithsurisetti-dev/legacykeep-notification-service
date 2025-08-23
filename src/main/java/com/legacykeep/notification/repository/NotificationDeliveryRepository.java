@@ -122,23 +122,24 @@ public interface NotificationDeliveryRepository extends JpaRepository<Notificati
     // Performance Queries
     // =============================================================================
 
-    /**
-     * Get average delivery time by channel
-     */
-    @Query("SELECT d.channel, " +
-           "AVG(EXTRACT(EPOCH FROM (d.deliveredAt - d.sentAt)) * 1000) as avgDeliveryTimeMs " +
-           "FROM NotificationDelivery d " +
-           "WHERE d.sentAt IS NOT NULL AND d.deliveredAt IS NOT NULL " +
-           "GROUP BY d.channel")
-    List<Object[]> getAverageDeliveryTimeByChannel();
+    // TODO: Fix these queries for performance analytics
+    // /**
+    //  * Get average delivery time by channel
+    //  */
+    // @Query("SELECT d.channel, " +
+    //        "AVG(EXTRACT(EPOCH FROM (d.deliveredAt - d.sentAt)) * 1000) as avgDeliveryTimeMs " +
+    //        "FROM NotificationDelivery d " +
+    //        "WHERE d.sentAt IS NOT NULL AND d.deliveredAt IS NOT NULL " +
+    //        "GROUP BY d.channel")
+    // List<Object[]> getAverageDeliveryTimeByChannel();
 
-    /**
-     * Get deliveries with delivery time above threshold
-     */
-    @Query("SELECT d FROM NotificationDelivery d " +
-           "WHERE d.sentAt IS NOT NULL AND d.deliveredAt IS NOT NULL " +
-           "AND EXTRACT(EPOCH FROM (d.deliveredAt - d.sentAt)) * 1000 > :thresholdMs")
-    List<NotificationDelivery> findDeliveriesWithDeliveryTimeAboveThreshold(@Param("thresholdMs") long thresholdMs);
+    // /**
+    //  * Get deliveries with delivery time above threshold
+    //  */
+    // @Query("SELECT d FROM NotificationDelivery d " +
+    //        "WHERE d.sentAt IS NOT NULL AND d.deliveredAt IS NOT NULL " +
+    //        "AND EXTRACT(EPOCH FROM (d.deliveredAt - d.sentAt)) * 1000 > :thresholdMs")
+    // List<NotificationDelivery> findDeliveriesWithDeliveryTimeAboveThreshold(@Param("thresholdMs") long thresholdMs);
 
     // =============================================================================
     // Cleanup Queries

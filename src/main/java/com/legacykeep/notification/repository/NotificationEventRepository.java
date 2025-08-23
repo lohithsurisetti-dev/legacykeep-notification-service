@@ -88,11 +88,12 @@ public interface NotificationEventRepository extends JpaRepository<NotificationE
      */
     List<NotificationEvent> findByCreatedAtBetween(LocalDateTime startDate, LocalDateTime endDate);
 
-    /**
-     * Find events created today
-     */
-    @Query("SELECT e FROM NotificationEvent e WHERE DATE(e.createdAt) = CURRENT_DATE")
-    List<NotificationEvent> findEventsCreatedToday();
+    // TODO: Fix this query for date comparison
+    // /**
+    //  * Find events created today
+    //  */
+    // @Query("SELECT e FROM NotificationEvent e WHERE DATE(e.createdAt) = CURRENT_DATE")
+    // List<NotificationEvent> findEventsCreatedToday();
 
     /**
      * Find events created in the last 24 hours
@@ -128,23 +129,24 @@ public interface NotificationEventRepository extends JpaRepository<NotificationE
      */
     List<NotificationEvent> findBySourceServiceAndEventType(String sourceService, String eventType);
 
-    /**
-     * Find events by source service and processing status
-     */
-    @Query("SELECT e FROM NotificationEvent e WHERE e.sourceService = :sourceService AND e.processedAt IS :processed")
-    List<NotificationEvent> findBySourceServiceAndProcessingStatus(
-            @Param("sourceService") String sourceService, 
-            @Param("processed") LocalDateTime processed
-    );
+    // TODO: Fix these queries for processing status
+    // /**
+    //  * Find events by source service and processing status
+    //  */
+    // @Query("SELECT e FROM NotificationEvent e WHERE e.sourceService = :sourceService AND e.processedAt IS :processed")
+    // List<NotificationEvent> findBySourceServiceAndProcessingStatus(
+    //         @Param("sourceService") String sourceService, 
+    //         @Param("processed") LocalDateTime processed
+    // );
 
-    /**
-     * Find events by event type and processing status
-     */
-    @Query("SELECT e FROM NotificationEvent e WHERE e.eventType = :eventType AND e.processedAt IS :processed")
-    List<NotificationEvent> findByEventTypeAndProcessingStatus(
-            @Param("eventType") String eventType, 
-            @Param("processed") LocalDateTime processed
-    );
+    // /**
+    //  * Find events by event type and processing status
+    //  */
+    // @Query("SELECT e FROM NotificationEvent e WHERE e.eventType = :eventType AND e.processedAt IS :processed")
+    // List<NotificationEvent> findByEventTypeAndProcessingStatus(
+    //         @Param("eventType") String eventType, 
+    //         @Param("processed") LocalDateTime processed
+    // );
 
     // =============================================================================
     // Analytics Queries
@@ -184,23 +186,24 @@ public interface NotificationEventRepository extends JpaRepository<NotificationE
     // Performance Queries
     // =============================================================================
 
-    /**
-     * Get average processing time by event type
-     */
-    @Query("SELECT e.eventType, AVG(EXTRACT(EPOCH FROM (e.processedAt - e.createdAt)) * 1000) as avgProcessingTimeMs FROM NotificationEvent e WHERE e.processedAt IS NOT NULL GROUP BY e.eventType")
-    List<Object[]> getAverageProcessingTimeByEventType();
+    // TODO: Fix these queries for performance analytics
+    // /**
+    //  * Get average processing time by event type
+    //  */
+    // @Query("SELECT e.eventType, AVG(EXTRACT(EPOCH FROM (e.processedAt - e.createdAt)) * 1000) as avgProcessingTimeMs FROM NotificationEvent e WHERE e.processedAt IS NOT NULL GROUP BY e.eventType")
+    // List<Object[]> getAverageProcessingTimeByEventType();
 
-    /**
-     * Get average processing time by source service
-     */
-    @Query("SELECT e.sourceService, AVG(EXTRACT(EPOCH FROM (e.processedAt - e.createdAt)) * 1000) as avgProcessingTimeMs FROM NotificationEvent e WHERE e.processedAt IS NOT NULL GROUP BY e.sourceService")
-    List<Object[]> getAverageProcessingTimeBySourceService();
+    // /**
+    //  * Get average processing time by source service
+    //  */
+    // @Query("SELECT e.sourceService, AVG(EXTRACT(EPOCH FROM (e.processedAt - e.createdAt)) * 1000) as avgProcessingTimeMs FROM NotificationEvent e WHERE e.processedAt IS NOT NULL GROUP BY e.sourceService")
+    // List<Object[]> getAverageProcessingTimeBySourceService();
 
-    /**
-     * Get events with processing time above threshold
-     */
-    @Query("SELECT e FROM NotificationEvent e WHERE e.processedAt IS NOT NULL AND EXTRACT(EPOCH FROM (e.processedAt - e.createdAt)) * 1000 > :thresholdMs")
-    List<NotificationEvent> findEventsWithProcessingTimeAboveThreshold(@Param("thresholdMs") long thresholdMs);
+    // /**
+    //  * Get events with processing time above threshold
+    //  */
+    // @Query("SELECT e FROM NotificationEvent e WHERE e.processedAt IS NOT NULL AND EXTRACT(EPOCH FROM (e.processedAt - e.createdAt)) * 1000 > :thresholdMs")
+    // List<NotificationEvent> findEventsWithProcessingTimeAboveThreshold(@Param("thresholdMs") long thresholdMs);
 
     // =============================================================================
     // Cleanup Queries

@@ -65,6 +65,7 @@ public class NotificationEvent {
     private String requestId;
 
     @Column(name = "event_data", columnDefinition = "JSONB")
+    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.JSON)
     private String eventData; // JSON string for event payload
 
     @Column(name = "processed_at")

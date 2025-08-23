@@ -46,10 +46,9 @@ public class NotificationDeliveryService {
      * This method is called asynchronously to handle the actual
      * delivery of notifications across different channels.
      */
-    @Async("notificationTaskExecutor")
     @Transactional
     public CompletableFuture<Void> processNotificationAsync(Notification notification) {
-        log.info("Processing notification asynchronously: id={}, type={}", 
+        log.info("Processing notification synchronously: id={}, type={}", 
                 notification.getId(), notification.getNotificationType());
 
         try {
@@ -68,8 +67,8 @@ public class NotificationDeliveryService {
                 notification.markAsSent();
                 delivery.markAsSent();
                 
-                // Attempt delivery confirmation (async)
-                CompletableFuture.runAsync(() -> confirmDelivery(notification, delivery));
+                log.info("Email sent successfully: id={}, to={}", 
+                        notification.getId(), notification.getRecipientEmail());
             } else {
                 // Mark as failed
                 notification.markAsFailed("Delivery service unavailable");

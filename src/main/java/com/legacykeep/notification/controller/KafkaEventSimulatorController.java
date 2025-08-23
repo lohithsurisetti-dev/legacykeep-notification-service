@@ -45,7 +45,7 @@ public class KafkaEventSimulatorController {
         try {
             // Create notification request
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
-                    .recipientId(Long.valueOf(request.getUserId()))
+                    .recipientId(9999L) // Default test user ID
                     .recipientEmail(request.getEmail())
                     .notificationType(NotificationType.EMAIL)
                     .channel(NotificationChannel.EMAIL)
@@ -86,7 +86,7 @@ public class KafkaEventSimulatorController {
         try {
             // Create notification request
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
-                    .recipientId(Long.valueOf(request.getUserId()))
+                    .recipientId(9999L) // Default test user ID
                     .recipientEmail(request.getEmail())
                     .notificationType(NotificationType.EMAIL)
                     .channel(NotificationChannel.EMAIL)
@@ -127,7 +127,7 @@ public class KafkaEventSimulatorController {
         try {
             // Create notification request
             SendNotificationRequest notificationRequest = SendNotificationRequest.builder()
-                    .recipientId(Long.valueOf(request.getUserId()))
+                    .recipientId(9999L) // Default test user ID
                     .recipientEmail(request.getEmail())
                     .notificationType(NotificationType.EMAIL)
                     .channel(NotificationChannel.EMAIL)
@@ -160,23 +160,36 @@ public class KafkaEventSimulatorController {
 
     private Map<String, Object> createEmailVerificationVariables(SimulateUserRegistrationRequest request) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("userName", request.getUserName());
-        variables.put("verificationUrl", "https://legacykeep.com/verify?token=" + request.getUserId() + "-verification-token");
+        // Set default username if not provided
+        String userName = (request.getUserName() != null && !request.getUserName().trim().isEmpty()) 
+            ? request.getUserName() 
+            : "LegacyKeep User";
+        variables.put("userName", userName);
+        variables.put("verificationUrl", "https://legacykeep.com/verify?token=test-verification-token-123");
         variables.put("expiryHours", 24);
         return variables;
     }
 
     private Map<String, Object> createPasswordResetVariables(SimulatePasswordResetRequest request) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("userName", request.getUserName());
-        variables.put("resetUrl", "https://legacykeep.com/reset-password?token=" + request.getUserId() + "-reset-token");
+        // Set default username if not provided
+        String userName = (request.getUserName() != null && !request.getUserName().trim().isEmpty()) 
+            ? request.getUserName() 
+            : "LegacyKeep User";
+        variables.put("userName", userName);
+        variables.put("resetUrl", "https://legacykeep.com/reset-password?token=test-reset-token-456");
         variables.put("expiryHours", 1);
         return variables;
     }
 
     private Map<String, Object> createWelcomeEmailVariables(SimulateWelcomeEmailRequest request) {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("userName", request.getUserName());
+        // Set default username if not provided
+        String userName = (request.getUserName() != null && !request.getUserName().trim().isEmpty()) 
+            ? request.getUserName() 
+            : "LegacyKeep User";
+        variables.put("userName", userName);
+        variables.put("dashboardUrl", "https://legacykeep.com/dashboard");
         variables.put("welcomeMessage", "Welcome to LegacyKeep! We're excited to have you on board.");
         return variables;
     }
@@ -186,43 +199,34 @@ public class KafkaEventSimulatorController {
     // =============================================================================
 
     public static class SimulateUserRegistrationRequest {
-        private String userId;
-        private String email;
+        private String recipientEmail;
         private String userName;
 
         // Getters and setters
-        public String getUserId() { return userId; }
-        public void setUserId(String userId) { this.userId = userId; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
+        public String getEmail() { return recipientEmail; }
+        public void setRecipientEmail(String recipientEmail) { this.recipientEmail = recipientEmail; }
         public String getUserName() { return userName; }
         public void setUserName(String userName) { this.userName = userName; }
     }
 
     public static class SimulatePasswordResetRequest {
-        private String userId;
-        private String email;
+        private String recipientEmail;
         private String userName;
 
         // Getters and setters
-        public String getUserId() { return userId; }
-        public void setUserId(String userId) { this.userId = userId; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
+        public String getEmail() { return recipientEmail; }
+        public void setRecipientEmail(String recipientEmail) { this.recipientEmail = recipientEmail; }
         public String getUserName() { return userName; }
         public void setUserName(String userName) { this.userName = userName; }
     }
 
     public static class SimulateWelcomeEmailRequest {
-        private String userId;
-        private String email;
+        private String recipientEmail;
         private String userName;
 
         // Getters and setters
-        public String getUserId() { return userId; }
-        public void setUserId(String userId) { this.userId = userId; }
-        public String getEmail() { return email; }
-        public void setEmail(String email) { this.email = email; }
+        public String getEmail() { return recipientEmail; }
+        public void setRecipientEmail(String recipientEmail) { this.recipientEmail = recipientEmail; }
         public String getUserName() { return userName; }
         public void setUserName(String userName) { this.userName = userName; }
     }

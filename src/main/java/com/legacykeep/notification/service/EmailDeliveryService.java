@@ -1,5 +1,6 @@
 package com.legacykeep.notification.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.legacykeep.notification.dto.event.NotificationEventDto;
 import com.legacykeep.notification.entity.Notification;
 import com.legacykeep.notification.entity.NotificationDelivery;
@@ -8,11 +9,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -36,6 +41,7 @@ public class EmailDeliveryService {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
     private final NotificationTemplateService templateService;
+    private final ObjectMapper objectMapper;
 
     // =============================================================================
     // Configuration Properties
@@ -147,10 +153,17 @@ public class EmailDeliveryService {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+        // Get template and process HTML content
+        NotificationTemplate template = templateService.getTemplateByTemplateId(notification.getTemplateId());
+        Map<String, Object> templateVariables = parseTemplateVariables(notification.getTemplateData());
+        
+        // Process HTML template with Thymeleaf using template path
+        String htmlContent = processHtmlTemplate(template.getHtmlTemplate(), templateVariables);
+
         // Set basic email properties
         helper.setTo(notification.getRecipientEmail());
         helper.setSubject(notification.getSubject());
-        helper.setText(notification.getContent(), true); // HTML content
+        helper.setText(htmlContent, true); // HTML content
 
         // Set sender information
         helper.setFrom(getSenderAddress(notification.getMetadata()));
@@ -244,12 +257,84 @@ public class EmailDeliveryService {
         String processedTemplate = template;
 
         for (Map.Entry<String, Object> entry : variables.entrySet()) {
-            String placeholder = "{{" + entry.getKey() + "}}";
+            // Handle ${variableName} syntax
+            String placeholder = "${" + entry.getKey() + "}";
             String value = entry.getValue() != null ? entry.getValue().toString() : "";
             processedTemplate = processedTemplate.replace(placeholder, value);
         }
 
         return processedTemplate;
+    }
+
+    /**
+     * Process HTML template with Thymeleaf.
+     */
+    private String processHtmlTemplate(String templatePath, Map<String, Object> variables) {
+        if (templatePath == null || templatePath.trim().isEmpty()) {
+            return "";
+        }
+
+        try {
+            log.info("Processing HTML template: {}, variables: {}", templatePath, variables);
+            
+            // Read the template file content
+            String templateContent = readTemplateFile(templatePath);
+            if (templateContent == null || templateContent.trim().isEmpty()) {
+                log.error("Template content is empty for path: {}", templatePath);
+                return "<html><body><h1>Email Template Error</h1><p>Template not found: " + templatePath + "</p></body></html>";
+            }
+            
+            Context context = new Context();
+            if (variables != null) {
+                context.setVariables(variables);
+            }
+
+            String result = templateEngine.process(templateContent, context);
+            log.info("Template processing result length: {}", result.length());
+            
+            return result;
+        } catch (Exception e) {
+            log.error("Error processing HTML template: {}", e.getMessage(), e);
+            return "<html><body><h1>Email Template Error</h1><p>Unable to process template: " + templatePath + "</p><p>Error: " + e.getMessage() + "</p></body></html>";
+        }
+    }
+
+    /**
+     * Read template file content from classpath.
+     */
+    private String readTemplateFile(String templatePath) {
+        try {
+            ClassPathResource resource = new ClassPathResource("templates/" + templatePath + ".html");
+            if (!resource.exists()) {
+                log.error("Template file not found: templates/{}.html", templatePath);
+                return null;
+            }
+            
+            byte[] bytes = resource.getInputStream().readAllBytes();
+            String content = new String(bytes, StandardCharsets.UTF_8);
+            log.info("Successfully read template file: templates/{}.html ({} bytes)", templatePath, content.length());
+            
+            return content;
+        } catch (IOException e) {
+            log.error("Error reading template file: templates/{}.html", templatePath, e);
+            return null;
+        }
+    }
+
+    /**
+     * Parse template variables from JSON string.
+     */
+    private Map<String, Object> parseTemplateVariables(String templateData) {
+        if (templateData == null || templateData.trim().isEmpty()) {
+            return Map.of();
+        }
+
+        try {
+            return objectMapper.readValue(templateData, Map.class);
+        } catch (Exception e) {
+            log.error("Error parsing template variables: {}", e.getMessage(), e);
+            return Map.of();
+        }
     }
 
     // =============================================================================

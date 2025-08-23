@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Your LegacyKeep Account</title>
+    <title>Welcome to LegacyKeep!</title>
     <style>
         * {
             margin: 0;
@@ -85,7 +85,7 @@
             margin-bottom: 0;
         }
         
-        .verification-section {
+        .features-section {
             background-color: #ffffff;
             border: 2px solid #3498db;
             padding: 20px;
@@ -94,17 +94,45 @@
             color: #333333;
         }
         
-        .verification-section h3 {
+        .features-section h3 {
             font-size: 18px;
             font-weight: bold;
             margin-bottom: 10px;
             color: #2c3e50;
         }
         
-        .verification-section p {
+        .features-section p {
             color: #555;
             font-size: 16px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .feature-item {
+            background-color: #f8f9fa;
+            border: 1px solid #3498db;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .feature-item h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #2c3e50;
+        }
+        
+        .feature-item p {
+            font-size: 12px;
+            margin-bottom: 0;
+            color: #555;
         }
         
         .btn {
@@ -212,6 +240,11 @@
                 font-size: 14px;
             }
             
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
             .footer {
                 padding: 15px;
             }
@@ -232,24 +265,43 @@
             
             <div class="welcome-message">
                 <h3>Hello <span th:text="${userName}">User</span>!</h3>
-                <p>Thank you for joining LegacyKeep! Please verify your email to get started.</p>
+                <p>Welcome to LegacyKeep! Your account is now ready.</p>
             </div>
             
-            <div class="verification-section">
-                <h3>Verify Your Email</h3>
-                <p>Click the button below to complete your account verification</p>
+            <div class="features-section">
+                <h3>What You Can Do</h3>
+                <p>LegacyKeep helps you preserve and share family memories</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-item">
+                        <h4>Upload Photos</h4>
+                        <p>Organize family photos</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Share Stories</h4>
+                        <p>Create family stories</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Connect Family</h4>
+                        <p>Invite family members</p>
+                    </div>
+                    <div class="feature-item">
+                        <h4>Secure Storage</h4>
+                        <p>Safe memory storage</p>
+                    </div>
+                </div>
                 
                 <div class="btn-container">
-                    <a th:href="${verificationUrl}" class="btn">Verify Email</a>
+                    <a th:href="${dashboardUrl}" class="btn">Get Started</a>
                 </div>
             </div>
             
             <div class="info-box">
-                <h4>Link Expires</h4>
-                <p>This verification link expires in <span th:text="${expiryHours}">24</span> hours.</p>
+                <h4>Need Help?</h4>
+                <p>Visit our help center for guides and tutorials.</p>
             </div>
             
-            <p>If you didn't create a LegacyKeep account, you can safely ignore this email.</p>
+            <p>Thank you for choosing LegacyKeep!</p>
             
             <p>Best regards,<br>
             <strong>The LegacyKeep Team</strong></p>

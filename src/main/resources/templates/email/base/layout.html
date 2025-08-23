@@ -1,181 +1,185 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title}">LegacyKeep</title>
+    <title>LegacyKeep - {{subject}}</title>
     <style>
-        /* Reset styles */
-        body, table, td, p, a, li, blockquote {
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-        }
-        table, td {
-            mso-table-lspace: 0pt;
-            mso-table-rspace: 0pt;
-        }
-        img {
-            -ms-interpolation-mode: bicubic;
-            border: 0;
-            height: auto;
-            line-height: 100%;
-            outline: none;
-            text-decoration: none;
-        }
-        
-        /* Base styles */
-        body {
+        /* Simple reset */
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Inter', Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.6;
-            color: #333333;
-            background-color: #F9FAFB;
+            box-sizing: border-box;
         }
         
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px 0;
+        }
+        
+        /* Simple container */
         .email-container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: #FFFFFF;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
         }
         
+        /* Simple header */
         .header {
-            background-color: #FFFFFF;
-            padding: 20px;
+            background-color: #2c3e50;
+            padding: 30px 20px;
             text-align: center;
-            border-bottom: 1px solid #E5E7EB;
         }
         
-        .logo {
-            max-width: 150px;
-            height: auto;
-        }
-        
-        .content {
-            padding: 40px 20px;
-            background-color: #FFFFFF;
-        }
-        
-        .title {
+        .logo h1 {
+            color: #ffffff;
             font-size: 24px;
-            font-weight: 600;
-            color: #111827;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .logo .tagline {
+            color: #bdc3c7;
+            font-size: 14px;
+        }
+        
+        /* Main content */
+        .content {
+            padding: 30px 20px;
+            background-color: #ffffff;
+        }
+        
+        .content h2 {
+            color: #2c3e50;
+            font-size: 20px;
+            font-weight: bold;
             margin-bottom: 20px;
             text-align: center;
         }
         
-        .subtitle {
-            font-size: 18px;
-            color: #6B7280;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        
-        .text {
+        .content p {
+            color: #555;
             font-size: 16px;
             line-height: 1.6;
-            color: #374151;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
-        .button {
+        /* Simple button */
+        .btn {
             display: inline-block;
-            background-color: #4F46E5;
-            color: #FFFFFF;
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: #ffffff;
             text-decoration: none;
-            padding: 15px 30px;
-            border-radius: 8px;
-            font-weight: 600;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-container {
             text-align: center;
+            margin: 25px 0;
+        }
+        
+        /* Simple info box */
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 15px;
             margin: 20px 0;
         }
         
-        .button:hover {
-            background-color: #3730A3;
+        .info-box h4 {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
         }
         
-        .button-danger {
-            background-color: #DC2626;
+        .info-box p {
+            color: #555;
+            margin-bottom: 0;
+            font-size: 14px;
         }
         
-        .button-danger:hover {
-            background-color: #B91C1C;
-        }
-        
+        /* Simple footer */
         .footer {
-            background-color: #F3F4F6;
+            background-color: #34495e;
             padding: 20px;
             text-align: center;
+            color: #ffffff;
         }
         
-        .footer-text {
-            font-size: 14px;
-            color: #6B7280;
+        .footer h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .footer p {
+            color: #bdc3c7;
+            font-size: 12px;
+            line-height: 1.4;
             margin-bottom: 10px;
         }
         
         .footer-links {
-            font-size: 14px;
-            color: #6B7280;
+            margin-top: 15px;
         }
         
         .footer-links a {
-            color: #6B7280;
+            color: #3498db;
             text-decoration: none;
+            margin: 0 10px;
+            font-size: 12px;
         }
         
         .footer-links a:hover {
-            text-decoration: underline;
+            color: #ffffff;
         }
         
-        .divider {
-            border-top: 1px solid #E5E7EB;
-            margin: 30px 0;
+        .copyright {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #4a5f7a;
+            color: #95a5a6;
+            font-size: 11px;
         }
         
-        .highlight {
-            background-color: #FEF3C7;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #F59E0B;
-            margin: 20px 0;
-        }
-        
-        .warning {
-            background-color: #FEE2E2;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #EF4444;
-            margin: 20px 0;
-        }
-        
-        /* Responsive design */
+        /* Mobile responsive */
         @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px 0;
+            }
+            
             .email-container {
-                width: 100% !important;
+                margin: 0 10px;
+            }
+            
+            .header {
+                padding: 20px 15px;
             }
             
             .content {
-                padding: 20px 15px !important;
+                padding: 20px 15px;
             }
             
-            .title {
-                font-size: 20px !important;
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
             }
             
-            .subtitle {
-                font-size: 16px !important;
-            }
-            
-            .text {
-                font-size: 14px !important;
-            }
-            
-            .button {
-                display: block !important;
-                width: 100% !important;
-                box-sizing: border-box !important;
+            .footer {
+                padding: 15px;
             }
         }
     </style>
@@ -184,28 +188,35 @@
     <div class="email-container">
         <!-- Header -->
         <div class="header">
-            <img th:src="${logoUrl}" alt="LegacyKeep" class="logo" />
+            <div class="logo">
+                <h1>LegacyKeep</h1>
+                <div class="tagline">Preserving Memories, Connecting Generations</div>
+            </div>
         </div>
         
-        <!-- Content -->
+        <!-- Main Content -->
         <div class="content">
-            <h1 class="title" th:text="${title}">Email Title</h1>
-            <p class="subtitle" th:if="${subtitle}" th:text="${subtitle}">Email Subtitle</p>
+            <h2>{{title}}</h2>
             
-            <!-- Dynamic content -->
-            <div th:replace="${content}">
-                <!-- Template-specific content goes here -->
+            <div th:utext="${content}">
+                <!-- Email content will be inserted here -->
             </div>
         </div>
         
         <!-- Footer -->
         <div class="footer">
-            <p class="footer-text">© 2025 LegacyKeep. All rights reserved.</p>
-            <p class="footer-links">
-                <a th:href="${privacyUrl}">Privacy Policy</a> | 
-                <a th:href="${helpUrl}">Help Center</a>
-                <span th:if="${unsubscribeUrl}"> | <a th:href="${unsubscribeUrl}">Unsubscribe</a></span>
-            </p>
+            <h3>LegacyKeep</h3>
+            <p>Preserving family memories and connecting generations</p>
+            
+            <div class="footer-links">
+                <a href="https://legacykeep.com/privacy">Privacy</a>
+                <a href="https://legacykeep.com/terms">Terms</a>
+                <a href="https://legacykeep.com/help">Help</a>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2025 LegacyKeep. All rights reserved.</p>
+            </div>
         </div>
     </div>
 </body>

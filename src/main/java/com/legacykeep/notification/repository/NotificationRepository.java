@@ -214,3 +214,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Query("DELETE FROM Notification n WHERE n.createdAt < :cutoffDate AND n.status IN ('DELIVERED', 'FAILED', 'CANCELLED')")
     int deleteOldNotifications(@Param("cutoffDate") LocalDateTime cutoffDate);
 }
+
+
+
+
+
+

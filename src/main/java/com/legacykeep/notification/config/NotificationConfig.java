@@ -386,3 +386,11 @@ public class NotificationConfig {
                 email.getRateLimit().getMaxPerHour(), email.getRateLimit().getMaxPerDay());
     }
 }
+
+
+
+
+
+
+
+

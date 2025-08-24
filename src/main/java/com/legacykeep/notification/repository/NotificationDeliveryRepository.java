@@ -189,3 +189,9 @@ public interface NotificationDeliveryRepository extends JpaRepository<Notificati
            "ORDER BY d.createdAt DESC")
     List<NotificationDelivery> findLatestDeliveriesForNotification(@Param("notificationId") Long notificationId);
 }
+
+
+
+
+
+

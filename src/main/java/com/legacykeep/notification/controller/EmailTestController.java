@@ -52,7 +52,8 @@ public class EmailTestController {
             MimeMessage message = mailSender.createMimeMessage();
             
             return ResponseEntity.ok(ApiResponse.success(
-                "Email configuration is healthy"
+                "Email configuration is healthy",
+                "Email service is working properly"
             ));
         } catch (Exception e) {
             log.error("Email health check failed", e);
@@ -104,7 +105,8 @@ public class EmailTestController {
             log.info("Simple test email sent successfully to: {}", to);
 
             return ResponseEntity.ok(ApiResponse.success(
-                "Simple test email sent successfully"
+                "Simple test email sent successfully",
+                "Email delivered to " + to
             ));
 
         } catch (Exception e) {
@@ -159,7 +161,8 @@ public class EmailTestController {
             log.info("Mime test email sent successfully to: {}", to);
 
             return ResponseEntity.ok(ApiResponse.success(
-                "Mime test email sent successfully"
+                "Mime test email sent successfully",
+                "HTML email delivered to " + to
             ));
 
         } catch (Exception e) {

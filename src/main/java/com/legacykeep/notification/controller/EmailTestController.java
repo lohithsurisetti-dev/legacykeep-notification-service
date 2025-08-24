@@ -2,6 +2,13 @@ package com.legacykeep.notification.controller;
 
 import com.legacykeep.notification.dto.ApiResponse;
 import com.legacykeep.notification.service.EmailDeliveryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +28,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/email-test")
 @RequiredArgsConstructor
+@Tag(name = "Email Testing", description = "APIs for testing email functionality and delivery")
 public class EmailTestController {
 
     private final JavaMailSender mailSender;
@@ -29,6 +37,14 @@ public class EmailTestController {
     /**
      * Test email configuration health
      */
+    @Operation(
+        summary = "Test Email Configuration Health",
+        description = "Checks if the email configuration is working properly"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Email configuration is healthy"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Email configuration failed")
+    })
     @GetMapping("/health")
     public ResponseEntity<ApiResponse> testEmailHealth() {
         try {
@@ -51,8 +67,19 @@ public class EmailTestController {
     /**
      * Send a simple test email
      */
+    @Operation(
+        summary = "Send Simple Test Email",
+        description = "Sends a simple text email for testing purposes"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Email sent successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request - missing required fields"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Failed to send email")
+    })
     @PostMapping("/send-simple")
-    public ResponseEntity<ApiResponse> sendSimpleTestEmail(@RequestBody Map<String, String> request) {
+    public ResponseEntity<ApiResponse> sendSimpleTestEmail(
+        @Parameter(description = "Email request containing to, subject, and message", required = true)
+        @RequestBody Map<String, String> request) {
         try {
             String to = request.get("to");
             String subject = request.get("subject");
@@ -93,8 +120,19 @@ public class EmailTestController {
     /**
      * Test MimeMessage creation
      */
+    @Operation(
+        summary = "Send HTML Test Email",
+        description = "Sends an HTML email for testing purposes"
+    )
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "HTML email sent successfully"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid request - missing required fields"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Failed to send email")
+    })
     @PostMapping("/send-mime")
-    public ResponseEntity<ApiResponse> sendMimeTestEmail(@RequestBody Map<String, String> request) {
+    public ResponseEntity<ApiResponse> sendMimeTestEmail(
+        @Parameter(description = "Email request containing to, subject, and htmlContent", required = true)
+        @RequestBody Map<String, String> request) {
         try {
             String to = request.get("to");
             String subject = request.get("subject");

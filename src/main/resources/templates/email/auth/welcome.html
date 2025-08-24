@@ -264,8 +264,10 @@
             <h2>Welcome to LegacyKeep!</h2>
             
             <div class="welcome-message">
-                <h3>Hello <span th:text="${userName}">User</span>!</h3>
+                <h3>Hello <span th:text="${fullName}">User</span>!</h3>
                 <p>Welcome to LegacyKeep! Your account is now ready.</p>
+                <p><strong>Username:</strong> <span th:text="${username}">username</span></p>
+                <p><strong>Email:</strong> <span th:text="${email}">email</span></p>
             </div>
             
             <div class="features-section">
@@ -324,6 +326,7 @@
     </div>
 </body>
 </html>
+
 
 
 

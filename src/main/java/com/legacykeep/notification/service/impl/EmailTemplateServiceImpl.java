@@ -122,7 +122,16 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
             context.setVariable("verificationToken", event.getVerificationToken());
             context.setVariable("frontendUrl", frontendUrl);
             context.setVariable("verificationUrl", frontendUrl + "/verify-email?token=" + event.getVerificationToken());
-            context.setVariable("expiresAt", event.getExpiresAt());
+            // Calculate expiration hours
+            long expiryHours = 24; // Default for email verification
+            if (event.getExpiresAt() != null) {
+                long hoursUntilExpiry = java.time.Duration.between(
+                    java.time.LocalDateTime.now(), 
+                    event.getExpiresAt()
+                ).toHours();
+                expiryHours = Math.max(1, hoursUntilExpiry); // Minimum 1 hour
+            }
+            context.setVariable("expiryHours", expiryHours);
 
             // Process template
             String htmlContent = templateEngine.process("email/auth/email-verification", context);
@@ -186,7 +195,16 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
             context.setVariable("resetToken", event.getResetToken());
             context.setVariable("frontendUrl", frontendUrl);
             context.setVariable("resetUrl", frontendUrl + "/reset-password?token=" + event.getResetToken());
-            context.setVariable("expiresAt", event.getExpiresAt());
+            // Calculate expiration hours
+            long expiryHours = 1; // Default for password reset
+            if (event.getExpiresAt() != null) {
+                long hoursUntilExpiry = java.time.Duration.between(
+                    java.time.LocalDateTime.now(), 
+                    event.getExpiresAt()
+                ).toHours();
+                expiryHours = Math.max(1, hoursUntilExpiry); // Minimum 1 hour
+            }
+            context.setVariable("expiryHours", expiryHours);
 
             // Process template
             String htmlContent = templateEngine.process("email/auth/password-reset", context);

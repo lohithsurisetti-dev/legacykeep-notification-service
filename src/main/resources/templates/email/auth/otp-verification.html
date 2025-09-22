@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your LegacyKeep Verification Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px 0;
+        }
+        
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .tagline {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .greeting {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .message {
+            font-size: 16px;
+            margin-bottom: 30px;
+            color: #555;
+            line-height: 1.6;
+        }
+        
+        .otp-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 30px 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+        
+        .otp-label {
+            color: white;
+            font-size: 14px;
+            margin-bottom: 10px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .otp-code {
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+        
+        .otp-expiry {
+            color: white;
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 10px;
+        }
+        
+        .instructions {
+            background-color: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 30px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .instructions p {
+            color: #555;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .security-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .security-note h4 {
+            color: #856404;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .security-note p {
+            color: #856404;
+            font-size: 13px;
+        }
+        
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .footer .company-info {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .support-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        .support-link:hover {
+            text-decoration: underline;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border: none;
+            }
+            
+            .header, .content, .footer {
+                padding: 20px;
+            }
+            
+            .otp-code {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">LegacyKeep</div>
+            <div class="tagline">Preserving Family Stories for Generations</div>
+        </div>
+        
+        <!-- Content -->
+        <div class="content">
+            <div class="greeting">
+                Hello <span th:text="${fullName ?: username}">User</span>! 👋
+            </div>
+            
+            <div class="message">
+                We received a request to verify your LegacyKeep account. Please use the verification code below to complete your registration:
+            </div>
+            
+            <!-- OTP Code Display -->
+            <div class="otp-container">
+                <div class="otp-label">Your Verification Code</div>
+                <div class="otp-code" th:text="${otpCode}">123456</div>
+                <div class="otp-expiry">
+                    This code expires in <span th:text="${expiryMinutes}">5</span> minutes
+                </div>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="instructions">
+                <h3>📱 How to verify:</h3>
+                <p>1. Open the LegacyKeep mobile app</p>
+                <p>2. Enter the 6-digit code above</p>
+                <p>3. Tap "Verify and Continue"</p>
+                <p>4. Start preserving your family legacy!</p>
+            </div>
+            
+            <!-- Security Note -->
+            <div class="security-note">
+                <h4>🔒 Security Notice</h4>
+                <p>If you didn't request this verification code, please ignore this email. Your account remains secure.</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p>
+                Need help? Contact our support team at 
+                <a href="mailto:support@legacykeep.com" class="support-link">support@legacykeep.com</a>
+            </p>
+            <div class="company-info">
+                <p>© 2025 LegacyKeep. All rights reserved.</p>
+                <p>Preserving memories, connecting generations.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

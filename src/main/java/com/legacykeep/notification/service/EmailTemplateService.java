@@ -3,7 +3,7 @@ package com.legacykeep.notification.service;
 import com.legacykeep.notification.event.dto.UserEmailVerifiedEvent;
 import com.legacykeep.notification.event.dto.UserPasswordResetRequestedEvent;
 import com.legacykeep.notification.event.dto.UserRegisteredEvent;
-import com.legacykeep.notification.event.dto.UserEmailVerificationRequestedEvent;
+import com.legacykeep.notification.event.dto.UserOtpVerificationRequestedEvent;
 
 /**
  * Service for sending templated emails using Thymeleaf.
@@ -29,19 +29,14 @@ public interface EmailTemplateService {
      */
     void sendWelcomeEmailAfterVerification(UserEmailVerifiedEvent event);
 
-    /**
-     * Send email verification email to user.
-     * 
-     * @param event User email verification requested event containing user details
-     */
-    void sendEmailVerificationEmail(UserEmailVerificationRequestedEvent event);
+    // Email link verification methods removed - using OTP verification as primary method
 
     /**
-     * Send email verification confirmation.
+     * Send OTP verification email.
      * 
-     * @param event User email verification event
+     * @param event User OTP verification requested event containing OTP code
      */
-    void sendEmailVerificationConfirmation(UserEmailVerifiedEvent event);
+    void sendOtpVerificationEmail(UserOtpVerificationRequestedEvent event);
 
     /**
      * Send password reset email.

@@ -3,7 +3,7 @@ package com.legacykeep.notification.service.impl;
 import com.legacykeep.notification.event.dto.UserEmailVerifiedEvent;
 import com.legacykeep.notification.event.dto.UserPasswordResetRequestedEvent;
 import com.legacykeep.notification.event.dto.UserRegisteredEvent;
-import com.legacykeep.notification.event.dto.UserEmailVerificationRequestedEvent;
+import com.legacykeep.notification.event.dto.UserOtpVerificationRequestedEvent;
 import com.legacykeep.notification.service.EmailTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +16,6 @@ import org.thymeleaf.context.Context;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Implementation of EmailTemplateService using Thymeleaf templates.
@@ -108,78 +106,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
         }
     }
 
-    @Override
-    public void sendEmailVerificationEmail(UserEmailVerificationRequestedEvent event) {
-        try {
-            log.info("Sending email verification email to: {}", event.getEmail());
-
-            // Prepare template context
-            Context context = new Context();
-            context.setVariable("user", event);
-            context.setVariable("fullName", event.getFullName());
-            context.setVariable("username", event.getUsername());
-            context.setVariable("email", event.getEmail());
-            context.setVariable("verificationToken", event.getVerificationToken());
-            context.setVariable("frontendUrl", frontendUrl);
-            context.setVariable("verificationUrl", frontendUrl + "/verify-email?token=" + event.getVerificationToken());
-            // Calculate expiration hours
-            long expiryHours = 24; // Default for email verification
-            if (event.getExpiresAt() != null) {
-                long hoursUntilExpiry = java.time.Duration.between(
-                    java.time.LocalDateTime.now(), 
-                    event.getExpiresAt()
-                ).toHours();
-                expiryHours = Math.max(1, hoursUntilExpiry); // Minimum 1 hour
-            }
-            context.setVariable("expiryHours", expiryHours);
-
-            // Process template
-            String htmlContent = templateEngine.process("email/auth/email-verification", context);
-
-            // Send email
-            sendHtmlEmail(
-                event.getEmail(),
-                "📧 Verify Your Email - LegacyKeep",
-                htmlContent
-            );
-
-            log.info("Email verification email sent successfully to: {}", event.getEmail());
-        } catch (Exception e) {
-            log.error("Failed to send email verification email to: {}", event.getEmail(), e);
-            throw new RuntimeException("Failed to send email verification email", e);
-        }
-    }
-
-    @Override
-    public void sendEmailVerificationConfirmation(UserEmailVerifiedEvent event) {
-        try {
-            log.info("Sending email verification confirmation to: {}", event.getEmail());
-
-            // Prepare template context
-            Context context = new Context();
-            context.setVariable("user", event);
-            context.setVariable("fullName", event.getFullName());
-            context.setVariable("username", event.getUsername());
-            context.setVariable("email", event.getEmail());
-            context.setVariable("frontendUrl", frontendUrl);
-            context.setVariable("dashboardUrl", frontendUrl + "/dashboard");
-
-            // Process template
-            String htmlContent = templateEngine.process("email/auth/email-verification", context);
-
-            // Send email
-            sendHtmlEmail(
-                event.getEmail(),
-                "✅ Email Verified - Welcome to LegacyKeep!",
-                htmlContent
-            );
-
-            log.info("Email verification confirmation sent successfully to: {}", event.getEmail());
-        } catch (Exception e) {
-            log.error("Failed to send email verification confirmation to: {}", event.getEmail(), e);
-            throw new RuntimeException("Failed to send email verification confirmation", e);
-        }
-    }
+    // Email link verification methods removed - using OTP verification as primary method
 
     @Override
     public void sendPasswordResetEmail(UserPasswordResetRequestedEvent event) {
@@ -220,6 +147,48 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
         } catch (Exception e) {
             log.error("Failed to send password reset email to: {}", event.getEmail(), e);
             throw new RuntimeException("Failed to send password reset email", e);
+        }
+    }
+
+    @Override
+    public void sendOtpVerificationEmail(UserOtpVerificationRequestedEvent event) {
+        try {
+            log.info("Sending OTP verification email to: {}", event.getEmail());
+
+            // Prepare template context
+            Context context = new Context();
+            context.setVariable("user", event);
+            context.setVariable("fullName", event.getFullName());
+            context.setVariable("username", event.getUsername());
+            context.setVariable("email", event.getEmail());
+            context.setVariable("otpCode", event.getOtpCode());
+            context.setVariable("frontendUrl", frontendUrl);
+            
+            // Calculate expiration minutes
+            long expiryMinutes = 5; // Default for OTP
+            if (event.getExpiresAt() != null) {
+                long minutesUntilExpiry = java.time.Duration.between(
+                    java.time.LocalDateTime.now(), 
+                    event.getExpiresAt()
+                ).toMinutes();
+                expiryMinutes = Math.max(1, minutesUntilExpiry); // Minimum 1 minute
+            }
+            context.setVariable("expiryMinutes", expiryMinutes);
+
+            // Process template
+            String htmlContent = templateEngine.process("email/auth/otp-verification", context);
+
+            // Send email
+            sendHtmlEmail(
+                event.getEmail(),
+                "🔐 Your LegacyKeep Verification Code",
+                htmlContent
+            );
+
+            log.info("OTP verification email sent successfully to: {}", event.getEmail());
+        } catch (Exception e) {
+            log.error("Failed to send OTP verification email to: {}", event.getEmail(), e);
+            throw new RuntimeException("Failed to send OTP verification email", e);
         }
     }
 

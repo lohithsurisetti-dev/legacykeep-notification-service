@@ -3,7 +3,7 @@ package com.legacykeep.notification.event.consumer;
 import com.legacykeep.notification.event.dto.UserEmailVerifiedEvent;
 import com.legacykeep.notification.event.dto.UserPasswordResetRequestedEvent;
 import com.legacykeep.notification.event.dto.UserRegisteredEvent;
-import com.legacykeep.notification.event.dto.UserEmailVerificationRequestedEvent;
+import com.legacykeep.notification.event.dto.UserOtpVerificationRequestedEvent;
 import com.legacykeep.notification.service.EmailTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,20 +61,24 @@ public class UserEventsConsumer {
         }
     }
 
+    // Email link verification removed - using OTP verification as primary method
+
+    // Email verification event handler removed - using OTP verification as primary method
+
     /**
-     * Handle user email verification requested events.
-     * Sends email verification email using Thymeleaf template.
+     * Handle user OTP verification requested events.
+     * Sends OTP email using Thymeleaf template.
      */
     @KafkaListener(
-        topics = "${kafka.topics.user-email-verification-requested:user.email.verification.requested}",
+        topics = "${kafka.topics.user-otp-verification-requested:user.otp.verification.requested}",
         groupId = "${spring.kafka.consumer.group-id:notification-service-group}"
     )
-    public void handleUserEmailVerificationRequested(Map<String, Object> eventMap) {
+    public void handleUserOtpVerificationRequested(Map<String, Object> eventMap) {
         try {
-            log.info("Received user email verification requested event: {}", eventMap.get("eventId"));
+            log.info("Received user OTP verification requested event: {}", eventMap.get("eventId"));
             
-            // Convert Map to UserEmailVerificationRequestedEvent DTO
-            UserEmailVerificationRequestedEvent event = UserEmailVerificationRequestedEvent.builder()
+            // Convert Map to UserOtpVerificationRequestedEvent DTO
+            UserOtpVerificationRequestedEvent event = UserOtpVerificationRequestedEvent.builder()
                 .eventId((String) eventMap.get("eventId"))
                 .userId(((Number) eventMap.get("userId")).longValue())
                 .email((String) eventMap.get("email"))
@@ -82,42 +86,18 @@ public class UserEventsConsumer {
                 .firstName((String) eventMap.get("firstName"))
                 .lastName((String) eventMap.get("lastName"))
                 .fullName((String) eventMap.get("fullName"))
-                .verificationToken((String) eventMap.get("verificationToken"))
+                .otpCode((String) eventMap.get("otpCode"))
                 .sourceService((String) eventMap.get("sourceService"))
                 .eventType((String) eventMap.get("eventType"))
                 .build();
             
-            // Send email verification email using Thymeleaf template
-            emailTemplateService.sendEmailVerificationEmail(event);
+            // Send OTP email using Thymeleaf template
+            emailTemplateService.sendOtpVerificationEmail(event);
             
-            log.info("Email verification email sent successfully for user: {}", event.getEmail());
+            log.info("OTP verification email sent successfully for user: {}", event.getEmail());
         } catch (Exception e) {
-            log.error("Failed to process user email verification requested event: {}", eventMap.get("eventId"), e);
+            log.error("Failed to process user OTP verification requested event: {}", eventMap.get("eventId"), e);
             // In production, you might want to send to a dead letter queue or retry
-        }
-    }
-
-    /**
-     * Handle user email verification events.
-     * Sends welcome email and verification confirmation using Thymeleaf template.
-     */
-    @KafkaListener(
-        topics = "${kafka.topics.user-email-verified:user.email.verified}",
-        groupId = "${spring.kafka.consumer.group-id:notification-service-group}"
-    )
-    public void handleUserEmailVerified(UserEmailVerifiedEvent event) {
-        try {
-            log.info("Received user email verification event: {}", event.getEventId());
-            
-            // Send welcome email (onboarding) using Thymeleaf template
-            emailTemplateService.sendWelcomeEmailAfterVerification(event);
-            
-            // Send email verification confirmation using Thymeleaf template
-            emailTemplateService.sendEmailVerificationConfirmation(event);
-            
-            log.info("Welcome email and verification confirmation sent successfully for user: {}", event.getEmail());
-        } catch (Exception e) {
-            log.error("Failed to process user email verification event: {}", event.getEventId(), e);
         }
     }
 

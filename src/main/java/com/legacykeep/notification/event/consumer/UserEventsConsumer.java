@@ -80,7 +80,7 @@ public class UserEventsConsumer {
             // Convert Map to UserOtpVerificationRequestedEvent DTO
             UserOtpVerificationRequestedEvent event = UserOtpVerificationRequestedEvent.builder()
                 .eventId((String) eventMap.get("eventId"))
-                .userId(((Number) eventMap.get("userId")).longValue())
+                .userId(eventMap.get("userId") != null ? ((Number) eventMap.get("userId")).longValue() : null)
                 .email((String) eventMap.get("email"))
                 .username((String) eventMap.get("username"))
                 .firstName((String) eventMap.get("firstName"))
